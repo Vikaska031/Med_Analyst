@@ -40,9 +40,8 @@ def set_header_background(image_url):
     st.markdown(header_style, unsafe_allow_html=True)
 
 # Загрузка и предобработка данных
-def load_and_preprocess_data(uploaded_file):
-    # Загружаем данные из загруженного файла
-    data = pd.read_excel(uploaded_file)
+def load_and_preprocess_data(file_path):
+    data = pd.read_excel(file_path)
     data['service_date'] = pd.to_datetime(data['service_date'])
     data.drop_duplicates(inplace=True)
     
@@ -155,7 +154,7 @@ def hypothesis_testing(data_2021, data_2022):
             "Средняя стоимость лечения одного пациента за месяц изменилась.",
             "Средняя стоимость одной услуги изменилась.",
             "Медианная стоимость лечения одного пациента за месяц изменилась.",
-            "Процент дорогостоящих услуг изменился."
+            "Процент пациентов с дорогостоящими услугами изменился."
         ],
         "p-value": [
             "<0.05", 
@@ -235,7 +234,7 @@ def hypothesis_testing(data_2021, data_2022):
 
 
 # Основная функция для анализа данных
-def analyze_medical_data():
+def analyze_medical_data(file_path):
     # Оформление страницы
     st.set_page_config(
         page_title="Тестовое задание Иванова Виктория",
@@ -250,34 +249,50 @@ def analyze_medical_data():
     """)
 
     # Укажите путь к картинке
-    image_url = '/Users/viktoriasmeleva/Desktop/Meditsina-innovatsii.jpeg'  # Замените на путь к вашему изображению
+    image_url = 'https://detifm.ru/vardata/modules/news/files/1/3677/news_file_3677_5e8363f4e399b.jpg'  # Замените на путь к вашему изображению
 
     # Установка фона с картинкой
     set_header_background(image_url)
 
     configure_visualizations()
+    data = load_and_preprocess_data(file_path)
+    metrics = calculate_metrics(data)
+    
+    # Вывод метрик в Streamlit
+    st.write(f"Уникальных пациентов: {metrics['unique_patients']}")
+    st.write(f"Уникальных услуг: {metrics['unique_services']}")
+    st.write(f"Уникальных визитов: {metrics['unique_visits']}")
+    
+    # Построение графиков
+    plot_gender_distribution(data)
+    plot_age_distribution(data)
+    plot_monthly_distribution(metrics)
+    plot_top_services(metrics)
+    
+    # Выводы по анализу
+    st.subheader("Основные выводы")
+    st.write("""
+    1. **Распределение по полу:**  
+       Женщины составляют большую часть пациентов, их доля значительно выросла в 2022 году.
+    
+    2. **Распределение по возрасту:**  
+       Основную часть пациентов составляют группы 19-35 и 36-50 лет.  
+       Значительный рост отмечается среди пациентов 19-35 лет.
+    
+    3. **Динамика визитов:**  
+       Наибольшее число визитов приходится на апрель и июль.  
+       В 2022 году общее число визитов значительно выше, чем в 2021.
+    
+    4. **Популярность услуг:**  
+       Первичный прием — самая востребованная услуга среди пациентов.
+    """)
 
-    # Виджет для загрузки файла
-    uploaded_file = st.file_uploader("Загрузите файл", type="xlsx")
+    # Анализ гипотез
+    data_2021 = data[data['year'] == 2021]
+    data_2022 = data[data['year'] == 2022]
+    hypothesis_testing(data_2021, data_2022)
 
-    if uploaded_file is not None:
-        data = load_and_preprocess_data(uploaded_file)
-        metrics = calculate_metrics(data)
 
-        # Вывод метрик в Streamlit
-        st.write(f"Уникальных пациентов: {metrics['unique_patients']}")
-        st.write(f"Уникальных услуг: {metrics['unique_services']}")
-        st.write(f"Уникальных визитов: {metrics['unique_visits']}")
-        
-        # Построение графиков
-        plot_gender_distribution(data)
-        plot_age_distribution(data)
-        plot_monthly_distribution(metrics)
-        plot_top_services(metrics)
-        
-        # Выводы по анализу гипотез
-        hypothesis_testing(data[data['year'] == 2021], data[data['year'] == 2022])
-
-# Запуск анализа
-if __name__ == "__main__":
-    analyze_medical_data()
+# Путь к файлу
+file_path = Path.cwd() / "data_test_task_2022.xlsx"
+analyze_medical_data(file_path)
