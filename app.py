@@ -295,4 +295,5 @@ def analyze_medical_data(file_path):
 
 # Путь к файлу
 
-analyze_medical_data('data_test_task_2022.xlsx')
+file_path = 'Med_Analyst/data_test_task_2022.xlsx'
+analyze_medical_data(file_path)
