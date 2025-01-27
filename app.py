@@ -294,5 +294,5 @@ def analyze_medical_data(file_path):
 
 
 # Путь к файлу
-file_path = Path.cwd() / "data_test_task_2022.xlsx"
-analyze_medical_data(file_path)
+
+analyze_medical_data('data_test_task_2022.xlsx')
